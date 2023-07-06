@@ -1,6 +1,5 @@
 import java.io.BufferedWriter;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.util.Scanner;
 
 
@@ -23,84 +22,65 @@ public class hw3 {
             System.out.println("Количество данных верное.");
         };
 
-        boolean isValidInput = false;
-        while (!isValidInput) {
-            try {
-                processUserData(input);
-                isValidInput = true;
-            } catch (InvalidDataException e) {
-                System.out.println("Ошибка: неверный формат данных");
-                System.out.println(e.getMessage());
-                System.out.println("Пожалуйста, повторите ввод данных.");
-                input = scanner.nextLine();
-            } catch (IOException e) {
-                System.out.println("Ошибка: возникла проблема с записью данных в файл.");
-                e.printStackTrace();
-                return;
+
+        try {
+            checkFormat(data);
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(data[0] + ".txt", true))) {
+                String userData = data[0] + " " + data[1] + " " + data[2] + " " + data[3];
+                writer.write(userData);
+                writer.newLine();
+                System.out.println("Данные успешно записаны в файл " + data[0] + ".txt");
+            }
+            catch (Exception e) {
+                System.out.println("Ошибка " + e.getMessage());
+            }
+        } catch (InvalidDataException e) {
+            System.out.println(e.getMessage());
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            e.printStackTrace();
+        }
+    }   
+
+
+        static int checkLength(String[] data) {
+            if (data.length < 4) {
+                return -1;
+            }
+            else if (data.length > 4){
+                return -2;
+            }
+            else {
+                return 4;
             }
         }
-    }
 
 
-    static int checkLength(String[] data) {
-        if (data.length < 4) {
-            return -1;
-        }
-        else if (data.length > 4){
-            return -2;
-        }
-        else {
-            return 4;
-        }
-    }
-
-
-    static void checkFormat (String[] data) {
-        String lastName = data[0];
-        String firstName = data[1];
-        String middleName = data[2];
-        String phoneNumber = data[3];
-
-
-
-
-        try {
-            if(!lastName.matches("[а-яёА-ЯЁ]+"))
-            
-        } catch (Exception e) {
-            // TODO: handle exception
+        static boolean isNumeric(String str) {
+            for (int i = 0; i < str.length(); i++) {
+                if(Character.isDigit(str.charAt(i))) {
+                    return true;
+                }
+            }
+            return false;
         }
 
-        try {
-            Long parsPhoneNumber = Long.parseLong(phoneNumber);
-        } catch (NumberFormatException e) {
-            throw new InvalidDataException("Неверный формат номера телефона.");
+
+        static void checkFormat (String[] data) throws InvalidDataException {
+            if (isNumeric(data[0])) throw new InvalidDataException("Ошибка - Фамилия указана неверно.");
+            if (isNumeric(data[1])) throw new InvalidDataException("Ошибка - Имя указано неверно.");
+            if (isNumeric(data[2])) throw new InvalidDataException("Ошибка - Отчество указано неверно.");
+
+            try {
+                Long parsPhoneNumber = Long.parseLong(data[3]);
+            } catch (Exception e) {
+                throw new InvalidDataException("Ошибка - Неверный формат номера телефона.");
+            }
         }
 
-        // Создание файла с данными
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(lastName + ".txt", true))) {
-            String userData = lastName + " " + firstName + " " + middleName + " " + phoneNumber;
-            writer.write(userData);
-            writer.newLine();
-            System.out.println("Данные успешно записаны в файл " + lastName + ".txt");
-        }
-    }
-
-    public static void stringChecking(String lastName, String firstName, String middleName) throws InvalidDataException{
-        if(!lastName.matches("[а-яёА-ЯЁ]+")){
-            throw new InvalidDataException("Фамилия указана неверно.");
-        }
-        if(!firstName.matches("[а-яёА-ЯЁ]+")){
-            throw new InvalidDataException("Имя указана неверно.");
-        }
-        if(!middleName.matches("[а-яёА-ЯЁ]+")){
-            throw new InvalidDataException("Отчество указано неверно.");
-        }
-    }
     
     
 }
-
 
     class InvalidDataException extends Exception {
         public InvalidDataException(String message) {
